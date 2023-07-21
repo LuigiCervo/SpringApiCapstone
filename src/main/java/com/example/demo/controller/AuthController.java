@@ -24,7 +24,6 @@ public class AuthController {
 	private AuthService authenticationService;
 
 	// Build Register REST API
-	@CrossOrigin("*")
 	@PostMapping(value = { "/register", "/signup" })
 	public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
 
@@ -38,7 +37,6 @@ public class AuthController {
 	}
 
 	// Build Login REST API
-	@CrossOrigin("*")
 	@PostMapping(value = { "/login", "/signin" })
 	public ResponseEntity<String> login(@RequestBody LoginDto loginDto) {
 
@@ -48,4 +46,10 @@ public class AuthController {
 		}
 		return new ResponseEntity<>(result.getError(), HttpStatus.BAD_REQUEST);
 	}
+	
+//	@GetMapping(value = "/whoami")
+//	@PreAuthorize("isAuthenticated()")
+//	public String personalInfo() {
+//		authenticationService.accountInfo("")
+//	}
 }

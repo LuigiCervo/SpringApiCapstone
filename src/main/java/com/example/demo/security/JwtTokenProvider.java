@@ -3,10 +3,14 @@ package com.example.demo.security;
 import java.security.Key;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.model.ERole;
+import com.example.demo.model.User;
+import com.example.demo.repository.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,19 +26,26 @@ public class JwtTokenProvider {
 	@Value("${jwt.expiration}")
 	private long expirationTimeInSeconds;
 
+	@Autowired
+	private UserRepository userRepository;
 	// generate JWT token
 	public String generateToken(Authentication authentication) {
 		String username = authentication.getName();
 		
 		Date now = new Date() ;
-		Date expirationDate = new Date(now.getTime()+ expirationTimeInSeconds);
+		Date expirationDate = new Date(now.getTime() + (1000* expirationTimeInSeconds));
 		
-		return Jwts.builder()
+		User user = userRepository.findByEmail(username).get();
+		
+		var jwt = Jwts.builder()
 			.setSubject(username)
+			.claim("name", user.getFirstName() + " " + user.getLastName())
 			.setIssuedAt(now)
-			.setExpiration(expirationDate)
-			.signWith(key())
-			.compact();
+			.setExpiration(expirationDate);
+		jwt.claim("admin",user.getRoles().stream().filter(r -> r.getRoleName() == ERole.ROLE_ADMIN).count() > 0 );
+		jwt.claim("golden",user.getRoles().stream().filter(r -> r.getRoleName() == ERole.ROLE_USER_GOLDEN).count() > 0 );
+
+		return jwt.signWith(key()).compact();
 	}
 
 	private Key key() {

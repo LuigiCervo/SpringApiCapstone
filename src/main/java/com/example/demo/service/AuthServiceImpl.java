@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
 			Authentication authentication = authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-
+			
 			String token = jwtTokenProvider.generateToken(authentication);
 			return new LoginResult(true, null, token);
 		} catch (BadCredentialsException e) {
